@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Sheets API Example</title>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script>
+        // API key
+        const API_KEY = 'AIzaSyAYIJIl6F9V2_dIECosa5OnpB5b4NX9_LI'; // Replace with your actual API key
+        // Spreadsheet ID and range
+        const SPREADSHEET_ID = '1pDAhsIc5q93I9TM206TsVbUr4ctcpoaQGkd09hmqybE'; // Replace with your actual Spreadsheet ID
+        const RANGE = 'Sheet1!A1:E10'; // Adjust this range according to your sheet
+
+        function handleClientLoad() {
+            gapi.load('client', initClient);
+        }
+
+        function initClient() {
+            gapi.client.init({
+                apiKey: API_KEY,
+                discoveryDocs: ["https://sheets.googleapis.com/$discovery/rest?version=v4"],
+            }).then(function () {
+                loadSheetData();
+            }).catch(function (error) {
+                console.log('Error initializing client:', error);
+            });
+        }
+
+        function loadSheetData() {
+            gapi.client.sheets.spreadsheets.values.get({
+                spreadsheetId: SPREADSHEET_ID,
+                range: RANGE,
+            }).then(function (response) {
+                const data = response.result.values;
+                displayData(data);
+            }).catch(function (error) {
+                console.log('Error retrieving data:', error);
+            });
+        }
+
+        function displayData(data) {
+            const content = document.getElementById('content');
+            if (data.length > 0) {
+                data.forEach(row => {
+                    content.innerHTML += row.join(', ') + '<br>';
+                });
+            } else {
+                content.innerHTML = 'No data found.';
+            }
+        }
+
+        // Start the API client load process on window load
+        window.onload = handleClientLoad;
+    </script>
+</head>
+<body>
+    <h1>Google Sheets API Example</h1>
+    <pre id="content"></pre>
+</body>
+</html>
