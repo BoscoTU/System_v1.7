@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Sheets API Example</title>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script>
+        // API key
+        const API_KEY = 'YOUR_API_KEY';
+        // Spreadsheet ID and range
+        const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID';
+        const READ_RANGE = 'Sheet1!A1:E10'; // Adjust this range according to your sheet
+        const WRITE_RANGE = 'Sheet1!A1:E1'; // Adjust this range according to where you want to write data
+
+        function handleClientLoad() {
+            gapi.load('client', initClient);
+        }
+
+        function initClient() {
+            gapi.client.init({
+                apiKey: API_KEY,
+                discoveryDocs: ["https://sheets.googleapis.com/$discovery/rest?version=v4"],
+            }).then(function () {
+                console.log('Google API client initialized.');
+                loadSheetData();
+            }).catch(function (error) {
+                console.error('Error initializing client:', error);
+            });
+        }
+
+        function loadSheetData() {
+            gapi.client.sheets.spreadsheets.values.get({
+                spreadsheetId: SPREADSHEET_ID,
+                range: READ_RANGE,
+            }).then(function (response) {
+                const data = response.result.values;
+                displayData(data);
+            }).catch(function (error) {
+                console.error('Error retrieving data:', error);
+            });
+        }
+
+        function displayData(data) {
+            const content = document.getElementById('content');
+            if (data.length > 0) {
+                data.forEach(row => {
+                    content.innerHTML += row.join(', ') + '<br>';
+                });
+            } else {
+                content.innerHTML = 'No data found.';
+            }
+        }
+
+        function writeSheetData() {
+            const values = [
+                ["Value1", "Value2", "Value3", "Value4", "Value5"] // Example data
+            ];
+
+            const body = {
+                values: values
+            };
+
+            gapi.client.sheets.spreadsheets.values.update({
+                spreadsheetId: SPREADSHEET_ID,
+                range: WRITE_RANGE,
+                valueInputOption: 'RAW',
+                resource: body,
+            }).then((response) => {
+                console.log('Data written:', response);
+            }).catch((error) => {
+                console.error('Error writing data:', error);
+            });
+        }
+
+        // Start the API client load process on window load
+        window.onload = handleClientLoad;
+    </script>
+</head>
+<body>
+    <h1>Google Sheets API Example</h1>
+    <button onclick="writeSheetData()">Write Data</button>
+    <pre id="content"></pre>
+</body>
+</html>
